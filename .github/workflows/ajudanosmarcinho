@@ -1,0 +1,976 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0a0f15">
+<title>MARCINHO · Vendas online e mapa de negócios locais</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0a0f15;--sf:#131c28;--sf2:#1a2535;--ln:rgba(255,255,255,.08);--ln2:rgba(255,255,255,.17);--tx:#eef2f7;--mu:#9aa7ba;--gd:#e2c283;--gd2:#b8944d;--jd:#46d6a4;--r:18px;
+--fd:"Fraunces",Georgia,"Times New Roman",serif;--fb:"Manrope",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+html{background:var(--bg);scroll-padding-top:90px}
+body{font-family:var(--fb);font-size:15.5px;line-height:1.65;color:var(--tx);min-height:100vh;-webkit-font-smoothing:antialiased;padding-bottom:env(safe-area-inset-bottom,0px);
+background:radial-gradient(900px 520px at 8% -8%,rgba(226,194,131,.10),transparent 60%),radial-gradient(800px 600px at 100% 30%,rgba(70,214,164,.06),transparent 60%),var(--bg);background-attachment:fixed}
+button,input{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--gd);outline-offset:2px}
+.w{max-width:1180px;margin:0 auto;padding:36px 24px 90px}
+/* header */
+.top{position:sticky;top:0;z-index:50;background:rgba(10,15,21,.8);backdrop-filter:blur(16px) saturate(1.3);-webkit-backdrop-filter:blur(16px) saturate(1.3);border-bottom:1px solid var(--ln);padding-top:env(safe-area-inset-top,0px)}
+.top-in{max-width:1180px;margin:0 auto;padding:13px 24px;display:flex;align-items:center;gap:26px}
+.brand{font-family:var(--fd);font-weight:600;font-size:24px;letter-spacing:.3em;line-height:1;background:linear-gradient(120deg,#f6e6bd,#c9a25b 55%,#f1dba2);-webkit-background-clip:text;background-clip:text;color:transparent;white-space:nowrap}
+.tabs{display:flex;gap:4px;margin-left:auto;overflow-x:auto;scrollbar-width:none;padding:2px}
+.tabs::-webkit-scrollbar{display:none}
+.tab{border:0;background:transparent;color:var(--mu);padding:9px 16px;border-radius:999px;cursor:pointer;font-weight:600;font-size:14px;white-space:nowrap;transition:background .2s,color .2s}
+.tab:hover{color:var(--tx);background:rgba(255,255,255,.05)}
+.tab.on{background:rgba(226,194,131,.14);color:var(--gd);box-shadow:inset 0 0 0 1px rgba(226,194,131,.28)}
+.tab .new{font-size:10px;font-weight:700;background:var(--jd);color:#06281d;padding:1px 6px;border-radius:99px;margin-left:6px}
+/* sections */
+.section{display:none}
+.section.on{display:block;animation:fade .35s ease}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+.section-title{font-family:var(--fd);font-weight:500;font-size:clamp(28px,4.4vw,44px);line-height:1.1;letter-spacing:-.015em;margin-bottom:12px}
+.section-title em,h1 em{font-style:normal}
+.section-desc{color:var(--mu);max-width:640px;margin-bottom:30px}
+.sub-title{font-family:var(--fd);font-weight:500;font-size:26px;letter-spacing:-.01em;margin:54px 0 8px;color:var(--tx)}
+.calc-box .sub-title{margin-top:0}
+/* hero */
+.hero{display:grid;grid-template-columns:1.15fr .85fr;gap:40px;align-items:center;padding:24px 0 52px}
+.badge{display:inline-block;font-size:13px;font-weight:600;color:var(--gd);background:rgba(226,194,131,.1);border:1px solid rgba(226,194,131,.28);padding:6px 14px;border-radius:99px}
+h1{font-family:var(--fd);font-weight:500;font-size:clamp(36px,5.6vw,66px);line-height:1.04;letter-spacing:-.025em;margin:22px 0 18px}
+.sub{color:var(--mu);font-size:17px;max-width:520px;margin-bottom:28px}
+.hero-cta{display:flex;gap:12px;flex-wrap:wrap}
+.radar{width:100%;max-width:400px;justify-self:center}
+.radar .rg{fill:none;stroke:rgba(226,194,131,.4);stroke-dasharray:3 7;transform-box:fill-box;transform-origin:center;animation:ring .9s cubic-bezier(.2,.8,.2,1) both}
+.radar .r1{fill:rgba(226,194,131,.07);animation-delay:.1s}.radar .r2{animation-delay:.3s}.radar .r3{animation-delay:.5s}
+.radar text{fill:var(--mu);font:600 11px var(--fb)}
+.radar .dt{animation:fade .6s ease 1s both}
+@keyframes ring{from{opacity:0;transform:scale(.35)}to{opacity:1;transform:scale(1)}}
+/* cards */
+.grid-2{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:18px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:18px}
+.card{background:linear-gradient(180deg,var(--sf2),var(--sf));border:1px solid var(--ln);border-radius:var(--r);padding:26px;display:flex;flex-direction:column;gap:12px;transition:border-color .25s}
+.card:hover{border-color:rgba(226,194,131,.35)}
+.card.wide{grid-column:1/-1;flex-direction:row;align-items:center;justify-content:space-between;gap:24px;background:linear-gradient(120deg,rgba(226,194,131,.14),rgba(70,214,164,.06) 60%,var(--sf));border-color:rgba(226,194,131,.3)}
+.card.wide .row{margin:0;flex:none}
+.card h3{font-family:var(--fd);font-weight:500;font-size:22px;line-height:1.25;letter-spacing:-.01em}
+.card p{color:var(--mu);font-size:15px}
+.card p strong{color:var(--tx);font-weight:600}
+.tip{margin-top:30px;padding:20px 24px;border-radius:var(--r);background:rgba(70,214,164,.07);border:1px solid rgba(70,214,164,.25);color:#cfeee3}
+.tags{display:flex;gap:6px;flex-wrap:wrap}
+.tag{font-size:12px;font-weight:600;padding:3px 11px;border-radius:99px;background:rgba(255,255,255,.06);color:var(--mu)}
+.tag.p{background:rgba(255,107,129,.13);color:#ff9aab}.tag.tk{background:rgba(70,214,214,.12);color:#7fe3e3}.tag.sh{background:rgba(255,150,80,.13);color:#ffb487}.tag.mp{background:rgba(226,194,131,.14);color:var(--gd)}
+.pr{font-size:14px;color:#c6d0de;white-space:pre-wrap;max-height:118px;overflow:hidden;position:relative;transition:max-height .5s ease;-webkit-mask-image:linear-gradient(#000 70%,transparent);mask-image:linear-gradient(#000 70%,transparent)}
+.card.open .pr{max-height:1000px;-webkit-mask-image:none;mask-image:none}
+.row{display:flex;gap:10px;margin-top:auto;padding-top:6px;flex-wrap:wrap}
+.btn{flex:1;min-height:44px;padding:10px 18px;border-radius:99px;border:1px solid var(--ln2);background:rgba(255,255,255,.03);color:var(--tx);font-weight:600;font-size:14px;cursor:pointer;transition:background .2s,border-color .2s,color .2s}
+.btn:hover{border-color:var(--gd);color:var(--gd)}
+.btn.m{background:linear-gradient(120deg,#f1d9a0,#c9a25b);border-color:transparent;color:#1b1407}
+.btn.m:hover{filter:brightness(1.08);color:#1b1407}
+.btn:disabled{opacity:.5;cursor:wait}
+.btn.wide{width:100%;flex:none}
+/* filters */
+input[type=text],input[type=number]{width:100%;min-height:48px;padding:12px 18px;border-radius:14px;border:1px solid var(--ln);background:rgba(255,255,255,.04);outline:none;transition:border-color .2s}
+input[type=text]::placeholder{color:#697689}
+input[type=text]:focus,input[type=number]:focus{border-color:var(--gd)}
+#q{margin-bottom:16px}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.chip{border:1px solid var(--ln);background:rgba(255,255,255,.03);color:var(--mu);padding:7px 15px;border-radius:99px;cursor:pointer;font-size:13.5px;font-weight:600;transition:all .2s;display:inline-flex;align-items:center;gap:7px}
+.chip:hover{color:var(--tx);border-color:var(--ln2)}
+.chip.on{background:rgba(226,194,131,.16);color:var(--gd);border-color:rgba(226,194,131,.45)}
+.chip i{width:8px;height:8px;border-radius:50%;background:var(--c,var(--gd))}
+.cnt{color:var(--mu);font-size:14px;font-weight:600;margin:22px 0 14px}
+.empty{color:var(--mu);padding:30px;text-align:center;border:1px dashed var(--ln2);border-radius:var(--r);grid-column:1/-1}
+/* steps */
+.step{position:relative;margin:0 0 14px 22px;padding:22px 24px;background:var(--sf);border:1px solid var(--ln);border-radius:var(--r)}
+.step::before{content:"";position:absolute;left:-22px;top:30px;width:10px;height:10px;border-radius:50%;background:var(--gd);box-shadow:0 0 0 4px rgba(226,194,131,.16)}
+.step::after{content:"";position:absolute;left:-18px;top:46px;bottom:-18px;width:2px;background:var(--ln)}
+.step:last-of-type::after{display:none}
+.step-num{font-size:13px;font-weight:700;color:var(--gd);margin-bottom:2px}
+.step h4,.error-content h4,.day-content h4{font-family:var(--fd);font-weight:500;font-size:20px;margin-bottom:6px}
+.step p,.step ul,.error-content p,.day-content p{color:var(--mu);font-size:15px}
+.step ul{margin:10px 0 0 18px}.step ul li::marker{color:var(--gd)}
+.check-item{display:flex;gap:14px;align-items:flex-start;padding:13px 16px;border:1px solid var(--ln);border-radius:14px;cursor:pointer;background:rgba(255,255,255,.02);transition:border-color .2s}
+.check-item:hover{border-color:var(--ln2)}
+.checklist{display:flex;flex-direction:column;gap:9px;margin-top:8px}
+.check-box{flex:none;width:22px;height:22px;border-radius:7px;border:2px solid var(--ln2);margin-top:1px;display:grid;place-items:center;transition:all .2s}
+.check-item.done .check-box{background:var(--jd);border-color:var(--jd)}
+.check-item.done .check-box::after{content:"";width:5px;height:10px;border:solid #06281d;border-width:0 2.5px 2.5px 0;transform:rotate(45deg) translate(-1px,-1px)}
+.check-item.done .check-label{color:var(--mu);text-decoration:line-through}
+.check-progress{color:var(--jd);font-weight:700;font-size:14px;margin-top:6px}
+.error-item,.day-card{display:flex;gap:18px;padding:20px 22px;margin-bottom:12px;background:var(--sf);border:1px solid var(--ln);border-radius:var(--r)}
+.error-num,.day-num{flex:none;width:44px;height:44px;border-radius:14px;display:grid;place-items:center;font-family:var(--fd);font-size:20px;font-weight:600;background:rgba(226,194,131,.12);color:var(--gd)}
+.glossary-item{padding:18px 4px;border-bottom:1px solid var(--ln);display:grid;grid-template-columns:200px 1fr;gap:20px}
+.glossary-term{font-family:var(--fd);font-size:20px;color:var(--gd)}
+.glossary-def{color:var(--mu)}
+.calc-box{max-width:620px;padding:28px;background:linear-gradient(180deg,var(--sf2),var(--sf));border:1px solid var(--ln);border-radius:var(--r);margin-bottom:10px}
+.calc-field{margin-bottom:16px}.calc-field label,.field>label{display:block;font-size:13.5px;font-weight:600;color:var(--mu);margin-bottom:7px}
+.calc-line{display:flex;justify-content:space-between;gap:12px;padding:11px 0;border-bottom:1px solid var(--ln);color:var(--mu)}
+.calc-line strong{color:var(--tx)}
+.calc-highlight{display:flex;justify-content:space-between;align-items:center;margin-top:16px;padding:18px 20px;border-radius:14px;background:rgba(226,194,131,.12);border:1px solid rgba(226,194,131,.35)}
+.calc-highlight strong{font-family:var(--fd);font-size:28px;color:var(--gd)}
+.ft{margin-top:70px;padding-top:24px;border-top:1px solid var(--ln);color:#6f7c90;font-size:13px;text-align:center}
+/* mapa */
+.mapgrid{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:20px;align-items:start}
+.mapcol{position:sticky;top:84px}
+#map{height:min(70vh,640px);min-height:380px;border-radius:var(--r);border:1px solid var(--ln2);overflow:hidden;background:#0d141d}
+.mapbar{margin-top:10px;font-size:14px;color:var(--mu);min-height:22px}
+.panel{display:flex;flex-direction:column;gap:18px;padding:22px;background:linear-gradient(180deg,var(--sf2),var(--sf));border:1px solid var(--ln);border-radius:var(--r)}
+.inline{display:flex;gap:8px}.inline .btn{flex:none}
+.seg{display:grid;grid-template-columns:repeat(3,1fr);padding:4px;background:rgba(255,255,255,.05);border-radius:99px}
+.seg button{border:0;background:transparent;color:var(--mu);padding:10px;border-radius:99px;font-weight:700;cursor:pointer}
+.seg button.on{background:linear-gradient(120deg,#f1d9a0,#c9a25b);color:#1b1407}
+.mini{display:flex;gap:16px}
+.link{background:none;border:0;color:var(--gd);font-size:13.5px;font-weight:600;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+.switch{display:flex;gap:10px;align-items:center;font-size:14px;color:var(--mu);cursor:pointer}
+.switch input{width:18px;height:18px;accent-color:var(--gd)}
+.results{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:14px}
+.res{--c:var(--gd);position:relative;padding:16px 18px 14px 22px;background:var(--sf);border:1px solid var(--ln);border-radius:16px;cursor:pointer;transition:border-color .2s}
+.res::before{content:"";position:absolute;left:0;top:14px;bottom:14px;width:4px;border-radius:0 4px 4px 0;background:var(--c)}
+.res:hover,.res.hl{border-color:var(--c)}
+.res-h{display:flex;justify-content:space-between;gap:10px;align-items:baseline}
+.res h4{font-family:var(--fd);font-weight:500;font-size:18px;line-height:1.25}
+.dist{flex:none;font-size:13px;font-weight:700;color:var(--jd)}
+.res-m{color:var(--mu);font-size:13.5px;margin:3px 0 10px}
+.res-m b{color:var(--c);font-weight:700}
+.res-a{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.res-a a{font-size:13px;font-weight:700;color:var(--tx);text-decoration:none;padding:6px 13px;border-radius:99px;background:rgba(255,255,255,.07)}
+.res-a a:hover{background:rgba(226,194,131,.2);color:var(--gd)}
+.tagx{font-size:12px;font-weight:700;color:#ffb487;background:rgba(255,150,80,.12);padding:5px 11px;border-radius:99px}
+.note{margin-top:22px;color:#76839a;font-size:13px;max-width:680px}
+.leaflet-container{font-family:var(--fb);background:#0d141d}
+.leaflet-popup-content-wrapper,.leaflet-popup-tip{background:var(--sf2);color:var(--tx);box-shadow:0 10px 30px rgba(0,0,0,.5)}
+.leaflet-popup-content{margin:14px 16px;font-size:14px;line-height:1.5}
+.leaflet-container a.leaflet-popup-close-button{color:var(--mu)}
+.leaflet-control-attribution{background:rgba(10,15,21,.8)!important;color:#8a97ab!important}
+.leaflet-control-attribution a{color:var(--gd)!important}
+.leaflet-bar a{background:var(--sf2);color:var(--tx);border-color:var(--ln)}
+.pin{display:block;width:16px;height:16px;border-radius:50%;background:var(--c);border:2.5px solid #0a0f15;box-shadow:0 0 0 1.5px var(--c),0 4px 10px rgba(0,0,0,.5)}
+.you{display:block;width:18px;height:18px;border-radius:50%;background:var(--gd);border:3px solid #0a0f15;box-shadow:0 0 0 6px rgba(226,194,131,.3)}
+@media (max-width:980px){
+.hero{grid-template-columns:1fr}.radar{max-width:210px;justify-self:start}
+.mapgrid{grid-template-columns:1fr}.mapcol{position:static}#map{height:58vh}
+.card.wide{flex-direction:column;align-items:stretch}
+}
+@media (max-width:640px){
+.w{padding:24px 16px 80px}
+.top-in{flex-wrap:wrap;gap:8px;padding:12px 16px}.brand{font-size:20px}.tabs{width:100%;margin:0}
+.glossary-item{grid-template-columns:1fr;gap:4px}
+.grid,.grid-2,.results{grid-template-columns:1fr}
+.inline{flex-direction:column}.inline .btn{width:100%}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<header class="top"><div class="top-in">
+  <div class="brand">MARCINHO</div>
+  <nav class="tabs" id="tabs" aria-label="Seções">
+    <button class="tab on" data-s="inicio">Início</button>
+    <button class="tab" data-s="mapa">Mapa de negócios<span class="new">novo</span></button>
+    <button class="tab" data-s="primeiros">Primeiros passos</button>
+    <button class="tab" data-s="prompts">Prompts</button>
+    <button class="tab" data-s="ferramentas">Ferramentas</button>
+    <button class="tab" data-s="glossario">Glossário</button>
+  </nav>
+</div></header>
+<div class="w">
+ 
+<div class="section on" id="s-inicio">
+  <div class="hero">
+    <div>
+      <span class="badge">TikTok Shop, Shopee e vendas locais</span>
+      <h1>Comece a vender do zero e encontre clientes perto de você.</h1>
+      <p class="sub">Passo a passo, prompts de IA prontos, calculadora de lucro e agora um mapa que lista padarias, pizzarias, salões e outros negócios num raio de 1, 5 ou 10 km.</p>
+      <div class="hero-cta">
+        <button class="btn m" style="flex:none" onclick="goTo('mapa')">Abrir o mapa de negócios</button>
+        <button class="btn" style="flex:none" onclick="goTo('primeiros')">Ver o passo a passo</button>
+      </div>
+    </div>
+    <svg class="radar" viewBox="0 0 360 360" role="img" aria-label="Círculos de 1, 5 e 10 km ao redor de um ponto">
+      <circle class="rg r3" cx="180" cy="180" r="168"/><circle class="rg r2" cx="180" cy="180" r="106"/><circle class="rg r1" cx="180" cy="180" r="48"/>
+      <text x="180" y="30" text-anchor="middle">10 km</text><text x="180" y="92" text-anchor="middle">5 km</text><text x="180" y="150" text-anchor="middle">1 km</text>
+      <g class="dt"><circle cx="150" cy="168" r="5" fill="#e2c283"/><circle cx="208" cy="198" r="5" fill="#ff6b6b"/><circle cx="122" cy="120" r="5" fill="#46d6a4"/><circle cx="240" cy="116" r="5" fill="#ff7ab8"/><circle cx="96" cy="236" r="5" fill="#5ea8ff"/><circle cx="262" cy="248" r="5" fill="#ffd166"/><circle cx="180" cy="300" r="5" fill="#e2c283"/><circle cx="64" cy="170" r="5" fill="#ff9f5a"/>
+      <circle cx="180" cy="180" r="14" fill="rgba(226,194,131,.25)"/><circle cx="180" cy="180" r="7" fill="#e2c283"/></g>
+    </svg>
+  </div>
+  <div class="grid-2">
+    <div class="card wide">
+      <div><h3>Mapa de negócios por raio</h3><p>Toque num ponto do mapa, escolha 1, 5 ou 10 km e os tipos de estabelecimento. Veja telefone, WhatsApp e quem ainda não tem site.</p></div>
+      <div class="row"><button class="btn m" onclick="goTo('mapa')">Abrir o mapa</button></div>
+    </div>
+    <div class="card"><h3>Nunca vendi nada online</h3><p>Comece em <strong>Primeiros passos</strong>: da conta de vendedor até a primeira venda, com checklist que guarda seu progresso.</p><div class="row"><button class="btn" onclick="goTo('primeiros')">Abrir primeiros passos</button></div></div>
+    <div class="card"><h3>Quero conteúdo pronto</h3><p>Mais de 60 prompts para copiar no ChatGPT, Claude ou Gemini, separados por nicho, tipo e plataforma.</p><div class="row"><button class="btn" onclick="goTo('prompts')">Ver prompts</button></div></div>
+    <div class="card"><h3>Quero calcular meus ganhos</h3><p>A <strong>calculadora de comissão</strong> mostra quanto sobra por venda no TikTok Shop e na Shopee.</p><div class="row"><button class="btn" onclick="goTo('ferramentas')">Abrir ferramentas</button></div></div>
+    <div class="card"><h3>Não entendo os termos</h3><p>O <strong>glossário</strong> explica UGC, CTA, live commerce, afiliado e outros termos em linguagem simples.</p><div class="row"><button class="btn" onclick="goTo('glossario')">Ver glossário</button></div></div>
+  </div>
+  <div class="tip"><strong>Dica:</strong> escolha uma plataforma, siga o plano de 7 dias e use os prompts para criar conteúdo. Consistência vale mais que perfeição.</div>
+</div>
+ 
+<div class="section" id="s-mapa">
+  <h2 class="section-title">Mapa de negócios por raio</h2>
+  <p class="section-desc">Toque ou clique no mapa para escolher o ponto. A lista mostra os estabelecimentos dos tipos marcados dentro do raio, do mais perto ao mais longe.</p>
+  <div class="mapgrid">
+    <div class="mapcol">
+      <div id="map" role="application" aria-label="Mapa interativo"></div>
+      <div class="mapbar" id="mapStatus" aria-live="polite"></div>
+    </div>
+    <aside class="panel">
+      <div class="field"><label for="addr">Buscar endereço ou cidade</label>
+        <div class="inline"><input type="text" id="addr" placeholder="Ex.: Av. Paulista, São Paulo"><button class="btn m" id="addrGo">Buscar</button></div></div>
+      <button class="btn wide" id="geoBtn">Usar minha localização</button>
+      <div class="field"><label>Raio de busca</label>
+        <div class="seg" id="radius"><button data-r="1000" class="on">1 km</button><button data-r="5000">5 km</button><button data-r="10000">10 km</button></div></div>
+      <div class="field"><label>Tipos de estabelecimento</label>
+        <div class="chips" id="cats"></div>
+        <div class="mini"><button class="link" id="catAll">Marcar todos</button><button class="link" id="catNone">Limpar</button></div></div>
+      <label class="switch"><input type="checkbox" id="onlyNoSite"> Mostrar só os que não informam site</label>
+      <div class="row"><button class="btn m" id="searchBtn">Buscar neste ponto</button><button class="btn" id="csvBtn">Baixar CSV</button></div>
+    </aside>
+  </div>
+  <div class="cnt" id="resCnt"></div>
+  <div class="results" id="results"></div>
+  <p class="note">Os dados vêm do OpenStreetMap e são mantidos por voluntários, então podem faltar negócios, telefones ou sites. O mapa não informa a data de abertura.</p>
+</div>
+<!-- ==================== SEÇÃO PRIMEIROS PASSOS ==================== -->
+    <div class="section" id="s-primeiros">
+      <h2 class="section-title">Primeiros <em>Passos</em></h2>
+      <p class="section-desc">
+        Um caminho claro do zero absoluto até a primeira venda. Siga na ordem e marque cada item concluído.
+      </p>
+ 
+      <!-- CHECKLIST INTERATIVO -->
+      <div class="card" style="margin-bottom:32px">
+        <h3>Checklist do Iniciante</h3>
+        <p>Marque cada tarefa conforme for concluindo. Seu progresso fica salvo enquanto você navega.</p>
+        <div class="checklist" id="checklist"></div>
+        <div class="check-progress" id="checkProgress">0 de 12 concluídos · 0%</div>
+        <div class="row" style="margin-top:14px">
+          <button class="btn" onclick="resetChecklist()">Resetar checklist</button>
+        </div>
+      </div>
+ 
+      <!-- PASSO A PASSO -->
+      <h3 class="sub-title">Passo a passo detalhado</h3>
+ 
+      <div class="step">
+        <div class="step-num">Passo 01</div>
+        <h4>Escolha sua plataforma</h4>
+        <p>Você não precisa estar em todas. Escolha uma para começar:</p>
+        <ul>
+          <li><strong>TikTok Shop</strong> — melhor para vídeos curtos e virais. Ideal se você já usa TikTok.</li>
+          <li><strong>Shopee</strong> — marketplace com busca ativa. Ideal para quem quer tráfego orgânico de quem já procura o produto.</li>
+        </ul>
+      </div>
+ 
+      <div class="step">
+        <div class="step-num">Passo 02</div>
+        <h4>Crie sua conta de vendedor</h4>
+        <p>Cadastre-se como vendedor na plataforma escolhida. Tenha em mãos: CPF ou CNPJ, comprovante de residência e dados bancários. O cadastro é gratuito.</p>
+      </div>
+ 
+      <div class="step">
+        <div class="step-num">Passo 03</div>
+        <h4>Escolha seu nicho</h4>
+        <p>Comece com o que você já conhece ou consome. Exemplos: moda feminina, beleza, casa, acessórios, pet, fitness. Nichos específicos vendem mais do que lojas genéricas.</p>
+      </div>
+ 
+      <div class="step">
+        <div class="step-num">Passo 04</div>
+        <h4>Encontre um fornecedor</h4>
+        <p>Você pode vender sem estoque usando dropshipping ou revenda. Fornecedores comuns: Shopee, AliExpress, 25 de Março (SP), feiras locais e atacadistas online.</p>
+      </div>
+ 
+      <div class="step">
+        <div class="step-num">Passo 05</div>
+        <h4>Cadastre seu primeiro produto</h4>
+        <p>Use os prompts de "Título otimizado" e "Descrição completa" da aba Prompts para criar uma página de produto que aparece nas buscas.</p>
+      </div>
+ 
+      <div class="step">
+        <div class="step-num">Passo 06</div>
+        <h4>Crie seu primeiro vídeo</h4>
+        <p>Use os prompts de roteiro. Grave com o celular mesmo. Luz natural, áudio limpo e legenda na tela. Poste 1 vídeo por dia nos primeiros 7 dias.</p>
+      </div>
+ 
+      <div class="step">
+        <div class="step-num">Passo 07</div>
+        <h4>Faça sua primeira venda</h4>
+        <p>Divulgue o link do produto na bio, nos comentários e no carrinho amarelo. Responda rápido. A primeira venda costuma vir nos primeiros 7 a 14 dias com consistência.</p>
+      </div>
+ 
+      <!-- ERROS COMUNS -->
+      <h3 class="sub-title">Erros mais comuns de iniciantes</h3>
+      <p class="section-desc" style="margin-bottom:8px">Evite estas armadilhas que travam 90% de quem está começando.</p>
+ 
+      <div id="errosList"></div>
+    </div>
+ 
+    <!-- ==================== SEÇÃO PROMPTS ==================== -->
+    <div class="section" id="s-prompts">
+      <h2 class="section-title">Biblioteca de <em>Prompts</em></h2>
+      <p class="section-desc">
+        Copie, cole no ChatGPT, Claude ou Gemini, troque os [campos] e gere conteúdo que vende.
+        Inclui meta-prompts que criam novos prompts para você.
+      </p>
+ 
+      <input type="text" id="q" placeholder="Buscar prompt… (ex: batom, live, shopee, meta-prompt, afiliado)">
+ 
+      <div class="chips" id="nich"></div>
+      <div class="chips" id="tipo"></div>
+      <div class="chips" id="plat"></div>
+ 
+      <div class="cnt" id="cnt"></div>
+      <div class="grid" id="g"></div>
+    </div>
+ 
+    <!-- ==================== SEÇÃO FERRAMENTAS ==================== -->
+    <div class="section" id="s-ferramentas">
+      <h2 class="section-title">Ferramentas <em>Práticas</em></h2>
+      <p class="section-desc">
+        Calculadoras e planos para você tomar decisões com clareza desde o primeiro dia.
+      </p>
+ 
+      <!-- CALCULADORA -->
+      <div class="calc-box" style="margin-bottom:40px">
+        <h3 class="sub-title">Calculadora de Comissão &amp; Lucro</h3>
+ 
+        <div class="calc-field">
+          <label>Preço de venda do produto (R$)</label>
+          <input type="number" id="calcPreco" value="79.90" step="0.01" min="0">
+        </div>
+ 
+        <div class="calc-field">
+          <label>Comissão da plataforma (%)</label>
+          <input type="number" id="calcComissao" value="20" step="0.1" min="0">
+        </div>
+ 
+        <div class="calc-field">
+          <label>Custo do produto / fornecedor (R$)</label>
+          <input type="number" id="calcCusto" value="35.00" step="0.01" min="0">
+        </div>
+ 
+        <div class="calc-field">
+          <label>Frete que você paga (R$)</label>
+          <input type="number" id="calcFrete" value="0.00" step="0.01" min="0">
+        </div>
+ 
+        <div class="calc-field">
+          <label>Quantidade de vendas por mês</label>
+          <input type="number" id="calcQtd" value="50" step="1" min="0">
+        </div>
+ 
+        <div class="calc-result" id="calcResult">
+          <div class="calc-line">
+            <span>Comissão da plataforma por venda</span>
+            <strong id="rComissao">R$ 0,00</strong>
+          </div>
+          <div class="calc-line">
+            <span>Lucro líquido por venda</span>
+            <strong id="rLucro">R$ 0,00</strong>
+          </div>
+          <div class="calc-line">
+            <span>Margem de lucro</span>
+            <strong id="rMargem">0%</strong>
+          </div>
+          <div class="calc-line">
+            <span>Faturamento mensal estimado</span>
+            <strong id="rFaturamento">R$ 0,00</strong>
+          </div>
+          <div class="calc-line">
+            <span>Lucro mensal estimado</span>
+            <strong id="rLucroMes">R$ 0,00</strong>
+          </div>
+          <div class="calc-highlight">
+            <span>Lucro anual projetado</span>
+            <strong id="rLucroAno">R$ 0,00</strong>
+          </div>
+        </div>
+      </div>
+ 
+      <!-- PLANO DE 7 DIAS -->
+      <h3 class="sub-title">Plano de 7 dias para começar</h3>
+      <p class="section-desc" style="margin-bottom:22px">Um roteiro dia a dia para tirar você da inércia e fazer sua primeira venda em uma semana.</p>
+ 
+      <div id="plano7"></div>
+ 
+      <!-- METAS REALISTAS -->
+      <h3 class="sub-title">Metas realistas por fase</h3>
+      <p class="section-desc" style="margin-bottom:22px">Não compare seu início com o meio de quem já está há anos. Estas são metas saudáveis.</p>
+ 
+      <div class="grid-2">
+        <div class="card">
+          <h3>Primeiros 30 dias</h3>
+          <p>Foco em aprender e publicar. Meta: 1 venda. Sim, apenas uma. Comemore cada venda como uma validação.</p>
+        </div>
+        <div class="card">
+          <h3>Dias 31 a 90</h3>
+          <p>Foco em consistência e análise. Meta: 10 a 30 vendas/mês. Comece a entender o que funciona e replique.</p>
+        </div>
+        <div class="card">
+          <h3>Dias 91 a 180</h3>
+          <p>Foco em escala e otimização. Meta: 50 a 100 vendas/mês. Invista em tráfego pago se tiver margem.</p>
+        </div>
+        <div class="card">
+          <h3>Após 6 meses</h3>
+          <p>Foco em marca e recorrência. Meta: 150+ vendas/mês. Crie lista de clientes e programa de fidelidade.</p>
+        </div>
+      </div>
+    </div>
+ 
+    <!-- ==================== SEÇÃO GLOSSÁRIO ==================== -->
+    <div class="section" id="s-glossario">
+      <h2 class="section-title">Glossário do <em>Iniciante</em></h2>
+      <p class="section-desc">
+        Todos os termos que você vai encontrar no caminho, explicados em português claro.
+      </p>
+ 
+      <div id="glossarioList"></div>
+    </div>
+ 
+    <div class="ft">MARCINHO © 2026</div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+    /* ==================== DADOS DOS PROMPTS ==================== */
+    const P = [
+      // ========== META-PROMPTS (geradores de prompts) ==========
+      ["Meta","Meta-Prompt","Gerador de prompts de venda TikTok Shop","Atue como engenheiro de prompts especialista em TikTok Shop. Crie 15 prompts de IA prontos para eu usar no ChatGPT que gerem: roteiros de vídeo, legendas, títulos de produto, respostas a comentários e scripts de live. Cada prompt deve ter [campos] substituíveis, tom [seu tom], foco em [nicho] e objetivo de conversão. Entregue em lista numerada com título e texto do prompt."],
+      ["Meta","Meta-Prompt","Gerador de prompts Shopee","Atue como especialista em Shopee Brasil. Gere 15 prompts de IA para eu usar no ChatGPT criando: títulos otimizados com palavras-chave, descrições de produto, respostas a perguntas frequentes, scripts de vídeo curto para Shopee Vídeo e mensagens de chat para recuperar carrinho abandonado. Nicho: [nicho]. Tom: [tom]. Inclua [campos] para personalizar."],
+      ["Meta","Meta-Prompt","Fábrica de prompts de moda","Crie 20 prompts de IA para donos de loja de moda venderem no TikTok Shop e Shopee. Cada prompt deve gerar um tipo diferente de conteúdo: provador, look do dia, antes/depois, unboxing, review, oferta relâmpago, live, anúncio, resposta a objeção e prova social. Para cada um, defina papel da IA, contexto, tarefa, formato de saída e [campos]."],
+      ["Meta","Meta-Prompt","Fábrica de prompts de beleza","Gere 20 prompts de IA para marcas de beleza venderem no TikTok Shop e Shopee. Cubra skincare, maquiagem, cabelo e perfumaria. Cada prompt deve produzir: roteiro de review, tutorial, mito vs verdade, antes/depois, unboxing, oferta, live e anúncio. Inclua [campos] e restrições (sem promessas médicas)."],
+      ["Meta","Meta-Prompt","Prompts para afiliados TikTok Shop","Crie 15 prompts de IA para afiliados do TikTok Shop escolherem produtos virais e criarem conteúdo que converte. Inclua prompts para: analisar tendências, escrever ganchos, fazer review honesto, comparar preço, criar urgência e chamar para o carrinho amarelo. Nicho: [nicho]."],
+      ["Meta","Meta-Prompt","Prompts para afiliados Shopee","Gere 15 prompts de IA para afiliados Shopee criarem conteúdo de venda. Inclua prompts para: achar produtos com comissão alta, criar títulos e descrições, roteiros de vídeo curto, posts para redes sociais, comparativos e mensagens de divulgação. Nicho: [nicho]."],
+      ["Meta","Meta-Prompt","Prompt mestre de copy para e-commerce","Atue como copywriter sênior de e-commerce. Crie um prompt mestre que eu possa reutilizar para gerar: título, subtítulo, descrição, bullets de benefícios, prova social, quebra de objeções e CTA para qualquer produto de [nicho] no TikTok Shop e Shopee. O prompt mestre deve ter [campos] e instruções passo a passo."],
+      ["Meta","Meta-Prompt","Prompt mestre de roteiro viral","Crie um prompt mestre para eu gerar roteiros de vídeos virais de até 30 segundos para TikTok Shop e Shopee. O prompt deve pedir à IA: gancho nos 2 primeiros segundos, 3 pontos de retenção, prova visual, CTA e texto na tela. Deve funcionar para [nicho] e [produto]."],
+      ["Meta","Meta-Prompt","Gerador de calendário de conteúdo","Gere 10 prompts de IA para criar calendários de conteúdo de 7, 15 e 30 dias para lojas de [nicho] no TikTok Shop e Shopee. Cada prompt deve definir: formato, tema, gancho, CTA e plataforma ideal (TikTok, Shopee Vídeo, Reels)."],
+      ["Meta","Meta-Prompt","Prompts de tráfego pago","Crie 12 prompts de IA para criar anúncios pagos no TikTok Ads e Shopee Ads. Inclua prompts para: público-alvo, criativos UGC, copies de anúncio, variações A/B, análise de métricas e otimização de campanha. Nicho: [nicho]. Orçamento: R$[valor]."],
+      ["Meta","Meta-Prompt","Prompts de live commerce","Gere 12 prompts de IA para planejar lives de venda no TikTok Shop e Shopee Live. Inclua prompts para: roteiro de abertura, ordem de produtos, falas de venda, ofertas relâmpago, interação com chat, quebra de objeções e encerramento com CTA."],
+      ["Meta","Meta-Prompt","Prompts de atendimento e pós-venda","Crie 10 prompts de IA para atendimento e pós-venda no TikTok Shop e Shopee. Inclua prompts para: responder dúvidas, tratar reclamações, recuperar carrinho abandonado, pedir avaliação, fidelizar cliente e oferecer cupom de recompra."],
+ 
+      // ========== MODA ==========
+      ["Moda","Roteiro","Look do dia que vende","Crie um roteiro de TikTok de 20 segundos mostrando um look completo com [produto principal] da minha loja. Estrutura: gancho nos 2 primeiros segundos, 3 trocas de look rápidas, benefício principal ([conforto/caimento/preço]) e CTA para o link da bio ou carrinho amarelo. Tom: animado e próximo, para público feminino de [idade]."],
+      ["Moda","Gancho","10 ganchos para provador","Liste 10 ganchos de abertura (até 8 palavras) para vídeos de provador de [peça de roupa]. Misture curiosidade, polêmica leve e prova social. Exemplo de estilo: 'Essa calça mudou meu corpo em 5 segundos'."],
+      ["Moda","Legenda","Legenda com urgência","Escreva 5 legendas curtas para um vídeo de [peça], com emoji, 3 hashtags de nicho e uma frase de escassez ('últimas [N] unidades'). Público: [perfil]. Preço: R$[valor]."],
+      ["Moda","Live","Roteiro de live de moda","Monte um roteiro de live de 60 minutos no TikTok Shop para vender [coleção]. Inclua abertura, rodízio de 8 peças com falas de venda, 3 ofertas relâmpago, interação com comentários e encerramento com CTA."],
+      ["Moda","Review","Antes e depois de styling","Crie um roteiro de 'antes e depois' transformando uma peça básica ([peça]) em 3 looks diferentes. Inclua texto na tela, trilha sugerida e um CTA para comprar a peça."],
+      ["Moda","Anúncio","Anúncio TikTok Ads moda","Escreva 3 variações de roteiro para anúncio no TikTok Ads (15s) de [produto], com dor do cliente, solução, prova social e oferta de [desconto]. Formato UGC, como se fosse uma cliente real falando."],
+      ["Moda","Shopee","Título otimizado Shopee moda","Gere 10 títulos otimizados para Shopee do produto [peça], com palavras-chave de busca, variações de cor, tamanho e benefício. Máximo 120 caracteres. Inclua 5 tags de busca relevantes."],
+      ["Moda","Shopee","Descrição completa Shopee moda","Escreva uma descrição de produto para Shopee de [peça], com: parágrafo de abertura, bullets de benefícios, tabela de medidas, dicas de conservação, prova social e chamada para compra. Tom: [tom]. Público: [perfil]."],
+      ["Moda","Shopee","Respostas a perguntas Shopee moda","Crie 15 respostas prontas para perguntas frequentes na Shopee sobre [peça]: tamanho, cor, tecido, entrega, troca, devolução e promoções. Tom simpático e profissional."],
+      ["Moda","Ideias","Calendário de 7 vídeos","Crie um calendário de 7 dias de vídeos para TikTok de uma loja de moda [estilo]. Para cada dia: formato, ideia, gancho e CTA. Misture bastidores, provador, tendência e oferta."],
+      ["Moda","Ideias","30 ideias de conteúdo","Liste 30 ideias de vídeos de TikTok para uma marca de moda [estilo], divididas em educativo, entretenimento e venda direta."],
+      ["Moda","UGC","Roteiro UGC de moda","Crie um roteiro UGC de 25 segundos para [peça], como se fosse uma cliente real gravando em casa. Inclua: problema, descoberta, prova visual, benefício e CTA para o carrinho amarelo. Tom autêntico, sem parecer anúncio."],
+ 
+      // ========== BELEZA ==========
+      ["Beleza","Roteiro","Review honesto de skincare","Crie um roteiro de 30 segundos de review honesto do [produto de skincare]. Estrutura: problema de pele, primeira impressão, resultado após [N] dias, para quem é indicado e CTA. Não faça promessas médicas nem de cura."],
+      ["Beleza","Gancho","Ganchos de maquiagem","Gere 10 ganchos de vídeo para [batom/base/máscara de cílios] que façam a pessoa parar de rolar o feed. Use curiosidade, comparação e 'erro comum'. Máximo de 9 palavras cada."],
+      ["Beleza","Legenda","Legenda + hashtags beleza","Escreva 5 legendas para um tutorial de [make/skincare/cabelo] com tom leve e persuasivo, CTA para o carrinho amarelo e 5 hashtags relevantes de beleza brasileiras."],
+      ["Beleza","Live","Live de lançamento de beleza","Monte o roteiro de uma live de 45 minutos para lançar [produto de beleza]: demonstração ao vivo, respostas para 6 dúvidas frequentes, combo promocional e contagem regressiva de oferta."],
+      ["Beleza","Review","Teste de produto viral","Crie um roteiro de vídeo 'testei o produto viral' para [produto], com expectativa vs. realidade, 2 pontos positivos, 1 ponto negativo honesto e veredito final com link para compra."],
+      ["Beleza","Anúncio","Anúncio de kit de beleza","Escreva 3 roteiros de anúncio de 20 segundos para o kit [nome do kit], destacando economia, praticidade e resultado visível. Comece com uma pergunta que faça a cliente se identificar."],
+      ["Beleza","Shopee","Título otimizado Shopee beleza","Gere 10 títulos otimizados para Shopee do produto [beleza], com palavras-chave de busca, benefício principal e indicação de quantidade/volume. Máximo 120 caracteres. Inclua 5 tags."],
+      ["Beleza","Shopee","Descrição completa Shopee beleza","Escreva uma descrição de produto para Shopee de [beleza], com: problema que resolve, modo de usar, ingredientes ativos, resultado esperado, contraindicações e prova social. Sem promessas médicas."],
+      ["Beleza","Shopee","Respostas a perguntas Shopee beleza","Crie 15 respostas prontas para perguntas frequentes na Shopee sobre [beleza]: validade, modo de usar, pele sensível, resultado, entrega e devolução. Tom acolhedor e profissional."],
+      ["Beleza","Ideias","30 ideias de conteúdo","Liste 30 ideias de vídeos de TikTok para uma marca de beleza focada em [nicho: skincare/make/cabelo], divididas em educativo, entretenimento e venda direta."],
+      ["Beleza","UGC","Roteiro UGC de beleza","Crie um roteiro UGC de 25 segundos para [produto de beleza], como se fosse uma cliente real. Inclua: rotina, aplicação, resultado imediato, benefício e CTA para o carrinho. Tom autêntico."],
+ 
+      // ========== TIKTOK SHOP ==========
+      ["TikTok Shop","Roteiro","Vídeo de vitrine TikTok Shop","Crie um roteiro de 20 segundos para vídeo de vitrine no TikTok Shop do produto [produto]. Estrutura: gancho visual, demonstração rápida, benefício principal, prova social e CTA para clicar no carrinho amarelo. Tom: [tom]."],
+      ["TikTok Shop","Gancho","Ganchos para carrinho amarelo","Gere 10 ganchos de abertura para vídeos que vendem no TikTok Shop, focados em fazer a pessoa clicar no carrinho amarelo. Use curiosidade, escassez, prova social e 'achadinho'. Máximo 8 palavras."],
+      ["TikTok Shop","Legenda","Legenda com CTA carrinho","Escreva 5 legendas para vídeo de [produto] no TikTok Shop, com emoji, 3 hashtags e CTA explícito para o carrinho amarelo. Inclua senso de urgência ('só hoje', 'últimas unidades')."],
+      ["TikTok Shop","Live","Roteiro de live TikTok Shop","Monte um roteiro de live de 90 minutos no TikTok Shop para vender [categoria]. Inclua: abertura, aquecimento, rodízio de 10 produtos com falas de venda, 5 ofertas relâmpago, interação com chat, quebra de objeções e encerramento."],
+      ["TikTok Shop","Afiliado","Plano de afiliado TikTok Shop","Crie um plano de 30 dias para afiliado TikTok Shop vender [nicho]. Inclua: escolha de produtos, frequência de postagem, tipos de vídeo, metas de comissão, análise de métricas e estratégias de escala."],
+      ["TikTok Shop","Afiliado","Review de afiliado","Crie um roteiro de review honesto de 30 segundos para afiliado TikTok Shop vender [produto]. Inclua: apresentação, expectativa, teste, resultado, prós e contras e CTA para o carrinho. Tom autêntico."],
+      ["TikTok Shop","Anúncio","Anúncio TikTok Shop Ads","Escreva 3 roteiros de anúncio de 15 segundos para TikTok Shop Ads de [produto], com dor, solução, prova social e oferta. Formato UGC, como cliente real."],
+      ["TikTok Shop","Ideias","Calendário TikTok Shop 30 dias","Crie um calendário de 30 dias de conteúdo para loja no TikTok Shop de [nicho]. Para cada dia: formato, ideia, gancho, CTA e produto em destaque. Misture entretenimento, educativo e venda."],
+      ["TikTok Shop","Métricas","Análise de métricas TikTok Shop","Atue como analista de dados. Crie um plano para analisar métricas de vídeos no TikTok Shop: views, retenção, cliques, conversão e comissão. Inclua o que fazer quando cada métrica está baixa e como testar variações."],
+      ["TikTok Shop","Objeção","Quebra de objeções TikTok Shop","Liste 15 objeções comuns de clientes no TikTok Shop sobre [produto] e escreva respostas persuasivas para cada uma, usando prova social, garantia e benefício."],
+ 
+      // ========== SHOPEE ==========
+      ["Shopee","Título","Título otimizado Shopee","Gere 10 títulos otimizados para Shopee do produto [produto], com palavras-chave de busca, benefício principal e variação. Máximo 120 caracteres. Inclua 5 tags de busca relevantes."],
+      ["Shopee","Descrição","Descrição completa Shopee","Escreva uma descrição de produto para Shopee de [produto], com: abertura, bullets de benefícios, especificações, modo de usar, prova social e CTA. Tom: [tom]. Público: [perfil]."],
+      ["Shopee","Gancho","Ganchos para Shopee Vídeo","Gere 10 ganchos de abertura para Shopee Vídeo do produto [produto]. Use curiosidade, comparação, escassez e 'achadinho'. Máximo 8 palavras."],
+      ["Shopee","Live","Roteiro de Shopee Live","Monte um roteiro de Shopee Live de 60 minutos para vender [categoria]. Inclua: abertura, aquecimento, rodízio de 8 produtos, 3 ofertas relâmpago, interação com chat, cupons e encerramento."],
+      ["Shopee","Afiliado","Plano de afiliado Shopee","Crie um plano de 30 dias para afiliado Shopee vender [nicho]. Inclua: escolha de produtos com boa comissão, frequência de postagem, tipos de conteúdo, metas e estratégias de escala."],
+      ["Shopee","Anúncio","Anúncio Shopee Ads","Escreva 3 variações de anúncio para Shopee Ads de [produto], com título, descrição curta e chamada para ação. Foque em palavras-chave de busca e benefício principal."],
+      ["Shopee","Ideias","Calendário Shopee 30 dias","Crie um calendário de 30 dias de conteúdo para loja na Shopee de [nicho]. Para cada dia: formato, ideia, gancho, CTA e produto em destaque. Misture Shopee Vídeo, posts e lives."],
+      ["Shopee","Métricas","Análise de métricas Shopee","Atue como analista de dados. Crie um plano para analisar métricas de loja na Shopee: visitas, cliques, conversão, avaliações e comissão. Inclua o que fazer quando cada métrica está baixa."],
+      ["Shopee","Objeção","Quebra de objeções Shopee","Liste 15 objeções comuns de clientes na Shopee sobre [produto] e escreva respostas persuasivas para cada uma, usando prova social, garantia e benefício."],
+      ["Shopee","Chat","Mensagens de chat Shopee","Crie 15 mensagens prontas para chat da Shopee: boas-vindas, dúvidas, negociação, recuperação de carrinho, pós-venda e pedido de avaliação. Tom simpático e profissional."],
+ 
+      // ========== VENDAS GERAIS ==========
+      ["Vendas","Copy","Copy para descrição de produto","Escreva uma copy de descrição de produto para [produto] em [plataforma], com: título magnético, parágrafo de abertura, bullets de benefícios, prova social, quebra de objeções e CTA. Tom: [tom]. Público: [perfil]."],
+      ["Vendas","Objeção","Quebra de objeções","Liste 15 objeções comuns de clientes sobre [produto] e escreva respostas persuasivas para cada uma, usando prova social, garantia e benefício."],
+      ["Vendas","UGC","Roteiro UGC universal","Crie um roteiro UGC de 25 segundos para [produto], como se fosse um cliente real. Inclua: problema, descoberta, teste, resultado, benefício e CTA. Tom autêntico, sem parecer anúncio."],
+      ["Vendas","E-mail","Sequência de e-mail de venda","Crie uma sequência de 5 e-mails para vender [produto]: boas-vindas, história, prova social, oferta e última chamada. Tom: [tom]. Público: [perfil]."],
+      ["Vendas","WhatsApp","Mensagens de WhatsApp","Crie 10 mensagens prontas de WhatsApp para vender [produto]: abordagem, follow-up, oferta, recuperação de carrinho e pós-venda. Tom simpático e direto."],
+      ["Vendas","Funil","Funil de vendas completo","Monte um funil de vendas para [produto] no TikTok Shop e Shopee: topo (descoberta), meio (consideração), fundo (conversão) e pós-venda (fidelização). Para cada etapa, defina conteúdo, canal e CTA."],
+      ["Vendas","Gancho","50 ganchos de venda","Gere 50 ganchos de abertura para vídeos de venda de [produto] no TikTok Shop e Shopee. Divida em: curiosidade, polêmica, prova social, escassez e comparação. Máximo 8 palavras cada."],
+      ["Vendas","Ideias","30 ideias de vídeo de venda","Liste 30 ideias de vídeos de venda para [produto] no TikTok Shop e Shopee, divididas em: demonstração, review, unboxing, comparação, oferta e prova social."],
+      ["Vendas","Roteiro","Roteiro de vídeo de 15s","Crie um roteiro de 15 segundos para vender [produto] no TikTok Shop ou Shopee. Estrutura: gancho, problema, solução, prova e CTA. Inclua texto na tela e sugestão de trilha."],
+      ["Vendas","Roteiro","Roteiro de vídeo de 30s","Crie um roteiro de 30 segundos para vender [produto] no TikTok Shop ou Shopee. Estrutura: gancho, contexto, demonstração, benefícios, prova social e CTA."],
+      ["Vendas","Roteiro","Roteiro de vídeo de 60s","Crie um roteiro de 60 segundos para vender [produto] no TikTok Shop ou Shopee. Estrutura: gancho, história, problema, solução, demonstração, prova social, oferta e CTA."],
+      ["Vendas","Live","Roteiro de live universal","Monte um roteiro de live de 60 minutos para vender [produto] no TikTok Shop ou Shopee Live. Inclua: abertura, aquecimento, demonstração, ofertas, interação, quebra de objeções e encerramento."],
+      ["Vendas","Pós-venda","Sequência de pós-venda","Crie uma sequência de 5 mensagens de pós-venda para [produto]: agradecimento, instruções de uso, pedido de avaliação, oferta de recompra e programa de fidelidade."],
+      ["Vendas","Fidelização","Programa de fidelização","Crie um programa de fidelização para clientes de [nicho] no TikTok Shop e Shopee: níveis, benefícios, cupons, conteúdos exclusivos e estratégias de recompra."]
+    ];
+ 
+    /* ==================== DADOS EXTRAS ==================== */
+    const CHECKLIST = [
+      "Escolhi minha plataforma principal (TikTok Shop ou Shopee)",
+      "Criei minha conta de vendedor e completei o cadastro",
+      "Defini meu nicho de atuação",
+      "Encontrei pelo menos um fornecedor confiável",
+      "Cadastrei meu primeiro produto com título e descrição otimizados",
+      "Tirei fotos ou gravei vídeo do meu produto",
+      "Criei minhas contas nas redes sociais para divulgar",
+      "Gravei e postei meu primeiro vídeo de venda",
+      "Configurei o carrinho amarelo ou link de afiliado",
+      "Respondi minhas primeiras dúvidas de clientes",
+      "Fiz minha primeira venda",
+      "Analisei as métricas do meu primeiro conteúdo"
+    ];
+ 
+    const ERROS = [
+      { t: "Querer vender para todo mundo", d: "Loja genérica não vende. Escolha um nicho específico e fale só com ele nos primeiros meses." },
+      { t: "Comprar estoque antes de validar", d: "Comece com dropshipping ou revenda sob demanda. Só invista em estoque depois de ter vendas constantes." },
+      { t: "Postar 3 vídeos e desistir", d: "O algoritmo precisa de consistência. O mínimo para começar a ver resultado é 30 vídeos em 30 dias." },
+      { t: "Copiar concorrente sem adaptar", d: "Inspire-se, mas adapte para o seu tom e seu público. Cópia literal não funciona e ainda queima sua imagem." },
+      { t: "Ignorar comentários e mensagens", d: "Responder rápido aumenta conversão e faz o algoritmo entregar seu conteúdo para mais gente." },
+      { t: "Não calcular margem de lucro", d: "Vender muito e lucrar pouco é o caminho mais rápido para desistir. Use a calculadora da aba Ferramentas." },
+      { t: "Prometer resultados milagrosos", d: "Além de antiético, queima sua marca e pode gerar problemas legais. Seja honesto sobre o que o produto faz." },
+      { t: "Focar só em preço baixo", d: "Sempre vai existir alguém mais barato. Compita por atendimento, conteúdo e confiança." },
+      { t: "Não pedir avaliação dos clientes", d: "Prova social é o que mais converte. Peça avaliação logo após a entrega, com educação." },
+      { t: "Desistir antes de 90 dias", d: "Os primeiros 3 meses são de aprendizado. Quem aguenta essa fase costuma colher resultados depois." }
+    ];
+ 
+    const PLANO7 = [
+      { d: "Dia 1", t: "Escolha e cadastro", p: "Decida entre TikTok Shop e Shopee. Crie sua conta de vendedor e complete o perfil. Explore a plataforma por 30 minutos." },
+      { d: "Dia 2", t: "Nicho e produto", p: "Defina seu nicho e escolha 1 produto para começar. Encontre um fornecedor e confirme preço e prazo de entrega." },
+      { d: "Dia 3", t: "Página do produto", p: "Use os prompts de título e descrição para criar sua página de produto. Capriche nas fotos ou grave um vídeo simples." },
+      { d: "Dia 4", t: "Primeiro conteúdo", p: "Grave seu primeiro vídeo usando um prompt de roteiro. Poste no TikTok ou Shopee Vídeo. Não perfeccionismo: publique." },
+      { d: "Dia 5", t: "Segundo e terceiro conteúdo", p: "Poste mais 2 vídeos com ângulos diferentes: um de demonstração e um de prova social ou comparação." },
+      { d: "Dia 6", t: "Divulgação e interação", p: "Compartilhe seus vídeos em grupos e stories. Responda todos os comentários. Analise qual vídeo performou melhor." },
+      { d: "Dia 7", t: "Análise e ajuste", p: "Veja as métricas: views, retenção, cliques. Replique o que funcionou e ajuste o que não funcionou. Planeje a semana 2." }
+    ];
+ 
+    const GLOSSARIO = [
+      { t: "Afiliado", d: "Pessoa que divulga produtos de outras lojas e ganha comissão por cada venda feita através do seu link." },
+      { t: "Carrinho amarelo", d: "Ícone que aparece nos vídeos do TikTok Shop permitindo ao espectador comprar o produto sem sair do vídeo." },
+      { t: "CTA (Call to Action)", d: "Chamada para ação. Frase que diz ao cliente o que fazer: 'clique no carrinho', 'compre agora', 'link na bio'." },
+      { t: "Dropshipping", d: "Modelo em que você vende sem estoque. O fornecedor envia o produto direto para o cliente." },
+      { t: "Gancho", d: "Primeiros 2 a 3 segundos de um vídeo. A frase ou cena que faz a pessoa parar de rolar o feed." },
+      { t: "Live commerce", d: "Venda ao vivo. Transmissão em tempo real onde você mostra produtos e o público compra durante a live." },
+      { t: "Métricas", d: "Números que mostram o desempenho do seu conteúdo: views, curtidas, cliques, conversão e comissão." },
+      { t: "Nicho", d: "Segmento específico de mercado. Exemplo: em vez de 'moda', escolher 'moda fitness feminina plus size'." },
+      { t: "Prova social", d: "Evidência de que outras pessoas compraram e aprovaram: avaliações, depoimentos, prints de clientes." },
+      { t: "Retenção", d: "Porcentagem do vídeo que as pessoas assistem. Quanto maior, melhor o algoritmo entrega seu conteúdo." },
+      { t: "UGC (User Generated Content)", d: "Conteúdo criado com aparência de cliente real, mesmo que seja feito por você. Mais autêntico que anúncio tradicional." },
+      { t: "Conversão", d: "Porcentagem de pessoas que viram seu produto e efetivamente compraram." },
+      { t: "Ticket médio", d: "Valor médio gasto por cliente em cada compra. Aumentar ticket médio é tão importante quanto vender mais." },
+      { t: "Remarketing", d: "Anunciar novamente para quem já interagiu com seu conteúdo ou produto, mas não comprou." },
+      { t: "Escala", d: "Aumentar o volume de vendas mantendo ou melhorando a margem. Vem depois da validação." }
+    ];
+ 
+    /* ==================== NAVEGAÇÃO ==================== */
+    function goTo(id) {
+      document.querySelectorAll('.section').forEach(s => s.classList.remove('on'));
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('on'));
+      document.getElementById('s-' + id).classList.add('on');
+      document.querySelector(`.tab[data-s="${id}"]`).classList.add('on');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+ 
+    document.getElementById('tabs').addEventListener('click', e => {
+      const tab = e.target.closest('.tab');
+      if (tab) goTo(tab.dataset.s);
+    });
+ 
+    /* ==================== CHECKLIST ==================== */
+    let checkState = JSON.parse(localStorage.getItem('marcinho_check') || '[]');
+ 
+    function renderChecklist() {
+      const el = document.getElementById('checklist');
+      el.innerHTML = CHECKLIST.map((item, i) =>
+        `<div class="check-item ${checkState[i] ? 'done' : ''}" data-i="${i}">
+          <div class="check-box"></div>
+          <div class="check-label">${item}</div>
+        </div>`
+      ).join('');
+      updateProgress();
+    }
+ 
+    function updateProgress() {
+      const done = checkState.filter(Boolean).length;
+      const total = CHECKLIST.length;
+      const pct = Math.round((done / total) * 100);
+      document.getElementById('checkProgress').textContent = `${done} de ${total} concluídos · ${pct}%`;
+    }
+ 
+    document.getElementById('checklist').addEventListener('click', e => {
+      const item = e.target.closest('.check-item');
+      if (!item) return;
+      const i = item.dataset.i;
+      checkState[i] = !checkState[i];
+      localStorage.setItem('marcinho_check', JSON.stringify(checkState));
+      renderChecklist();
+    });
+ 
+    function resetChecklist() {
+      checkState = [];
+      localStorage.setItem('marcinho_check', JSON.stringify(checkState));
+      renderChecklist();
+    }
+ 
+    /* ==================== ERROS ==================== */
+    function renderErros() {
+      document.getElementById('errosList').innerHTML = ERROS.map((e, i) =>
+        `<div class="error-item">
+          <div class="error-num">${String(i + 1).padStart(2, '0')}</div>
+          <div class="error-content">
+            <h4>${e.t}</h4>
+            <p>${e.d}</p>
+          </div>
+        </div>`
+      ).join('');
+    }
+ 
+    /* ==================== PLANO 7 DIAS ==================== */
+    function renderPlano7() {
+      document.getElementById('plano7').innerHTML = PLANO7.map(p =>
+        `<div class="day-card">
+          <div class="day-num">${p.d.replace('Dia ', '')}</div>
+          <div class="day-content">
+            <h4>${p.t}</h4>
+            <p>${p.p}</p>
+          </div>
+        </div>`
+      ).join('');
+    }
+ 
+    /* ==================== GLOSSÁRIO ==================== */
+    function renderGlossario() {
+      document.getElementById('glossarioList').innerHTML = GLOSSARIO.map(g =>
+        `<div class="glossary-item">
+          <div class="glossary-term">${g.t}</div>
+          <div class="glossary-def">${g.d}</div>
+        </div>`
+      ).join('');
+    }
+ 
+    /* ==================== CALCULADORA ==================== */
+    function calc() {
+      const preco = parseFloat(document.getElementById('calcPreco').value) || 0;
+      const comissaoPct = parseFloat(document.getElementById('calcComissao').value) || 0;
+      const custo = parseFloat(document.getElementById('calcCusto').value) || 0;
+      const frete = parseFloat(document.getElementById('calcFrete').value) || 0;
+      const qtd = parseFloat(document.getElementById('calcQtd').value) || 0;
+ 
+      const comissaoValor = preco * (comissaoPct / 100);
+      const lucroVenda = preco - comissaoValor - custo - frete;
+      const margem = preco > 0 ? (lucroVenda / preco) * 100 : 0;
+      const faturamento = preco * qtd;
+      const lucroMes = lucroVenda * qtd;
+      const lucroAno = lucroMes * 12;
+ 
+      const fmt = v => 'R$ ' + v.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+ 
+      document.getElementById('rComissao').textContent = fmt(comissaoValor);
+      document.getElementById('rLucro').textContent = fmt(lucroVenda);
+      document.getElementById('rMargem').textContent = margem.toFixed(1) + '%';
+      document.getElementById('rFaturamento').textContent = fmt(faturamento);
+      document.getElementById('rLucroMes').textContent = fmt(lucroMes);
+      document.getElementById('rLucroAno').textContent = fmt(lucroAno);
+    }
+ 
+    ['calcPreco','calcComissao','calcCusto','calcFrete','calcQtd'].forEach(id => {
+      document.getElementById(id).addEventListener('input', calc);
+    });
+ 
+    /* ==================== PROMPTS ==================== */
+    let n = "Todos", t = "Todos", pl = "Todas", s = "";
+    const $ = i => document.getElementById(i);
+ 
+    function chips(el, list, cur, set) {
+      $(el).innerHTML = list.map(x =>
+        `<button class="chip ${x === cur ? 'on' : ''}" data-v="${x}">${x}</button>`
+      ).join("");
+      $(el).onclick = e => {
+        const v = e.target.dataset.v;
+        if (v) { set(v); draw(); }
+      };
+    }
+ 
+    function draw() {
+      chips("nich", ["Todos", ...new Set(P.map(p => p[0]))], n, v => n = v);
+      chips("tipo", ["Todos", ...new Set(P.map(p => p[1]))], t, v => t = v);
+      chips("plat", ["Todas", "TikTok", "TikTok Shop", "Shopee"], pl, v => pl = v);
+ 
+      const r = P.map((p, i) => [...p, i]).filter(p => {
+        const okN = n === "Todos" || p[0] === n;
+        const okT = t === "Todos" || p[1] === t;
+        const okP = pl === "Todas" ||
+          p[0] === pl ||
+          (pl === "TikTok" && (p[0] === "TikTok Shop" || p[0] === "Moda" || p[0] === "Beleza")) ||
+          (pl === "TikTok Shop" && p[0] === "TikTok Shop") ||
+          (pl === "Shopee" && p[0] === "Shopee");
+        const okS = (p[2] + p[3]).toLowerCase().includes(s);
+        return okN && okT && okP && okS;
+      });
+ 
+      $("cnt").textContent = r.length + " prompts";
+ 
+      $("g").innerHTML = r.length ? r.map(p => {
+        const platTag =
+          p[0] === "Shopee" ? '<span class="tag sh">Shopee</span>' :
+          p[0] === "TikTok Shop" ? '<span class="tag tk">TikTok Shop</span>' :
+          p[0] === "Meta" ? '<span class="tag mp">Meta</span>' :
+          '<span class="tag p">TikTok</span>';
+ 
+        return `<div class="card" id="c${p[4]}">
+          <div class="tags">${platTag}<span class="tag">${p[0]}</span><span class="tag">${p[1]}</span></div>
+          <h3>${p[2]}</h3>
+          <div class="pr">${p[3]}</div>
+          <div class="row">
+            <button class="btn" data-a="o" data-i="${p[4]}">Ver tudo</button>
+            <button class="btn m" data-a="c" data-i="${p[4]}">Copiar</button>
+          </div>
+        </div>`;
+      }).join("") : '<div class="empty">Nenhum prompt encontrado.</div>';
+    }
+ 
+    $("g").onclick = e => {
+      const b = e.target.closest("button");
+      if (!b) return;
+      const i = b.dataset.i;
+      if (b.dataset.a === "o") {
+        const c = $("c" + i);
+        c.classList.toggle("open");
+        b.textContent = c.classList.contains("open") ? "Recolher" : "Ver tudo";
+      } else {
+        const tx = P[i][3];
+        const ok = () => {
+          b.textContent = "Copiado";
+          setTimeout(() => b.textContent = "Copiar", 1500);
+        };
+        try {
+          navigator.clipboard.writeText(tx).then(ok, () => fb(tx, ok));
+        } catch (_) {
+          fb(tx, ok);
+        }
+      }
+    };
+ 
+    function fb(tx, ok) {
+      const a = document.createElement("textarea");
+      a.value = tx;
+      document.body.appendChild(a);
+      a.select();
+      try { document.execCommand("copy"); ok(); } catch (_) {}
+      a.remove();
+    }
+ 
+    $("q").oninput = e => {
+      s = e.target.value.toLowerCase();
+      draw();
+    };
+ 
+ 
+/* ==================== MAPA DE NEGÓCIOS (OpenStreetMap + Overpass) ==================== */
+const CATS = {
+  padaria:{l:'Padaria',c:'#e2c283',t:[['shop','^bakery$']],n:'padaria|panificadora'},
+  lanchonete:{l:'Lanchonete',c:'#ff9f5a',t:[['amenity','^fast_food$']],n:'lanchonete'},
+  pizzaria:{l:'Pizzaria',c:'#ff6b6b',t:[['cuisine','pizza']],n:'pizz'},
+  restaurante:{l:'Restaurante',c:'#f2a1d2',t:[['amenity','^restaurant$']]},
+  cafe:{l:'Café',c:'#c49a6c',t:[['amenity','^cafe$']]},
+  bar:{l:'Bar',c:'#b79cff',t:[['amenity','^(bar|pub)$']]},
+  sorveteria:{l:'Sorveteria',c:'#7fd6ff',t:[['amenity','^ice_cream$'],['shop','^ice_cream$']]},
+  salao:{l:'Salão de beleza',c:'#ff7ab8',t:[['shop','^(hairdresser|beauty)$']],n:'sal[aã]o'},
+  barbearia:{l:'Barbearia',c:'#5ea8ff',n:'barbear|barber'},
+  roupas:{l:'Loja de roupas',c:'#9be37a',t:[['shop','^(clothes|boutique|shoes|fashion_accessories)$']]},
+  cosmeticos:{l:'Cosméticos',c:'#ffb3d1',t:[['shop','^(cosmetics|perfumery)$']]},
+  mercado:{l:'Mercado',c:'#46d6a4',t:[['shop','^(supermarket|convenience|greengrocer)$']]},
+  acougue:{l:'Açougue',c:'#ff8a7a',t:[['shop','^butcher$']]},
+  farmacia:{l:'Farmácia',c:'#6ee7b7',t:[['amenity','^pharmacy$'],['shop','^chemist$']]},
+  academia:{l:'Academia',c:'#ffd166',t:[['leisure','^fitness_centre$']]},
+  pet:{l:'Pet shop',c:'#8ad1c2',t:[['shop','^pet$'],['amenity','^veterinary$']]},
+  oficina:{l:'Oficina',c:'#a0aec0',t:[['shop','^car_repair$']]}
+};
+const EPS = ['https://overpass-api.de/api/interpreter','https://overpass.kumi.systems/api/interpreter'];
+let map, layer, centerMk, circle, center = null, radius = 1000, data = [], shown = [], markers = [], tok = 0, timer;
+const sel = new Set(['padaria','lanchonete','pizzaria']);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const say = t => { $('mapStatus').textContent = t; };
+const site = t => t.website || t['contact:website'] || t.url || '';
+const phone = t => t.phone || t['contact:phone'] || t['contact:mobile'] || t.mobile || '';
+const addr = t => [t['addr:street'], t['addr:housenumber']].filter(Boolean).join(', ') + (t['addr:suburb'] ? ' - ' + t['addr:suburb'] : '');
+const wa = p => { const d = p.replace(/\D/g, ''); return d.startsWith('55') ? d : '55' + d; };
+const fmtD = d => d < 1000 ? Math.round(d) + ' m' : (d / 1000).toFixed(1).replace('.', ',') + ' km';
+const url = u => esc(/^https?:\/\//i.test(u) ? u : 'https://' + u);
+function dist(a, b, c, d) {
+  const R = 6371000, r = x => x * Math.PI / 180, dl = r(c - a), dn = r(d - b);
+  const h = Math.sin(dl / 2) ** 2 + Math.cos(r(a)) * Math.cos(r(c)) * Math.sin(dn / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(h));
+}
+function match(c, tags) {
+  return (c.t || []).some(([k, v]) => tags[k] && new RegExp(v).test(tags[k])) || !!(c.n && tags.name && new RegExp(c.n, 'i').test(tags.name));
+}
+function renderCats() {
+  $('cats').innerHTML = Object.entries(CATS).map(([id, c]) =>
+    `<button class="chip ${sel.has(id) ? 'on' : ''}" style="--c:${c.c}" data-id="${id}"><i></i>${c.l}</button>`).join('');
+}
+function initMap() {
+  if (map) { setTimeout(() => map.invalidateSize(), 60); return; }
+  if (!window.L) { say('Não foi possível carregar o mapa. Verifique sua conexão com a internet.'); return; }
+  map = L.map('map').setView([-14.2, -51.9], 4);
+  const tl = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { subdomains: 'abcd', maxZoom: 19, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>' }).addTo(map);
+  let te = 0; tl.on('tileerror', () => { if (++te === 3) say('As imagens do mapa não carregaram. Verifique a internet ou se algum bloqueador está ativo.'); });
+  layer = L.layerGroup().addTo(map);
+  map.on('click', e => setCenter(e.latlng.lat, e.latlng.lng, true));
+  say('Toque no mapa para escolher o ponto de busca.');
+}
+function drawArea() {
+  if (!map || !center) return;
+  if (centerMk) centerMk.remove();
+  if (circle) circle.remove();
+  centerMk = L.marker([center.lat, center.lng], { icon: L.divIcon({ className: '', html: '<span class="you"></span>', iconSize: [18, 18], iconAnchor: [9, 9] }), interactive: false, keyboard: false }).addTo(map);
+  circle = L.circle([center.lat, center.lng], { radius, color: '#e2c283', weight: 1.5, fillColor: '#e2c283', fillOpacity: .07, interactive: false }).addTo(map);
+  map.fitBounds(circle.getBounds(), { padding: [20, 20] });
+}
+function setCenter(lat, lng, go) { center = { lat, lng }; drawArea(); if (go) runSearch(); }
+async function runSearch() {
+  if (!center) { say('Escolha um ponto no mapa primeiro.'); return; }
+  if (!sel.size) { say('Marque ao menos um tipo de estabelecimento.'); return; }
+  const my = ++tok, A = `(around:${radius},${center.lat},${center.lng});`, parts = [];
+  sel.forEach(id => {
+    const c = CATS[id];
+    (c.t || []).forEach(([k, v]) => parts.push(`nwr["${k}"~"${v}"]${A}`));
+    if (c.n) parts.push(`nwr["name"~"${c.n}",i]${A}`);
+  });
+  const q = `[out:json][timeout:25];(${parts.join('')});out center tags 600;`;
+  say('Buscando estabelecimentos…'); $('searchBtn').disabled = true;
+  let json = null;
+  for (const ep of EPS) {
+    try {
+      const r = await fetch(ep, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: 'data=' + encodeURIComponent(q) });
+      if (!r.ok) throw new Error(r.status);
+      json = await r.json(); break;
+    } catch (_) {}
+  }
+  if (my !== tok) return;
+  $('searchBtn').disabled = false;
+  if (!json) { say('A busca falhou. Tente de novo em instantes ou use um raio menor.'); return; }
+  const seen = new Set(); data = [];
+  for (const el of json.elements) {
+    const key = el.type + el.id;
+    if (seen.has(key)) continue; seen.add(key);
+    const tags = el.tags || {}, la = el.lat != null ? el.lat : (el.center && el.center.lat), lo = el.lon != null ? el.lon : (el.center && el.center.lon);
+    if (la == null) continue;
+    const id = [...sel].find(i => match(CATS[i], tags));
+    if (id) data.push({ id, name: tags.name || '', tags, lat: la, lng: lo, d: dist(center.lat, center.lng, la, lo) });
+  }
+  data.sort((a, b) => a.d - b.d);
+  renderRes();
+}
+function popup(x) {
+  const t = x.tags, p = phone(t);
+  return `<strong>${esc(x.name || 'Sem nome cadastrado')}</strong><br>${CATS[x.id].l}, a ${fmtD(x.d)}` + (addr(t) ? `<br>${esc(addr(t))}` : '') + (p ? `<br>${esc(p)}` : '');
+}
+function renderRes() {
+  const only = $('onlyNoSite').checked;
+  shown = data.filter(x => !only || !site(x.tags));
+  layer.clearLayers(); markers = [];
+  shown.forEach((x, i) => {
+    const m = L.marker([x.lat, x.lng], { icon: L.divIcon({ className: '', html: `<span class="pin" style="--c:${CATS[x.id].c}"></span>`, iconSize: [16, 16], iconAnchor: [8, 8] }) }).addTo(layer);
+    m.bindPopup(popup(x), { maxWidth: 240 });
+    m.on('click', () => focusRes(i));
+    markers.push(m);
+  });
+  const km = radius / 1000;
+  $('resCnt').textContent = shown.length ? `${shown.length} estabelecimentos em ${km} km` : '';
+  say(shown.length ? `${shown.length} encontrados em ${km} km. Toque em outro ponto para refazer a busca.` : `Nada encontrado em ${km} km com esses filtros. Aumente o raio ou marque outros tipos.`);
+  $('results').innerHTML = shown.map((x, i) => {
+    const c = CATS[x.id], t = x.tags, p = phone(t), s = site(t), a = addr(t);
+    return `<article class="res" id="r${i}" style="--c:${c.c}" data-i="${i}">
+      <div class="res-h"><h4>${esc(x.name || 'Sem nome cadastrado')}</h4><span class="dist">${fmtD(x.d)}</span></div>
+      <div class="res-m"><b>${c.l}</b>${a ? ' | ' + esc(a) : ''}</div>
+      <div class="res-a">${p ? `<a href="tel:${esc(p)}">Ligar</a><a target="_blank" rel="noopener" href="https://wa.me/${wa(p)}">WhatsApp</a>` : ''}
+      ${s ? `<a target="_blank" rel="noopener" href="${url(s)}">Site</a>` : '<span class="tagx">sem site</span>'}
+      <a target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&destination=${x.lat},${x.lng}">Rota</a></div></article>`;
+  }).join('');
+}
+function focusRes(i) {
+  document.querySelectorAll('.res.hl').forEach(e => e.classList.remove('hl'));
+  const el = $('r' + i); if (el) { el.classList.add('hl'); el.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+}
+function later() { clearTimeout(timer); if (center) timer = setTimeout(runSearch, 700); }
+$('results').onclick = e => {
+  if (e.target.closest('a')) return;
+  const r = e.target.closest('.res'); if (!r) return;
+  const i = +r.dataset.i; map.setView([shown[i].lat, shown[i].lng], Math.max(map.getZoom(), 17));
+  markers[i].openPopup(); $('map').scrollIntoView({ behavior: 'smooth', block: 'center' });
+};
+$('cats').onclick = e => {
+  const b = e.target.closest('.chip'); if (!b) return;
+  sel.has(b.dataset.id) ? sel.delete(b.dataset.id) : sel.add(b.dataset.id);
+  b.classList.toggle('on'); later();
+};
+$('catAll').onclick = () => { Object.keys(CATS).forEach(k => sel.add(k)); renderCats(); later(); };
+$('catNone').onclick = () => { sel.clear(); renderCats(); };
+$('radius').onclick = e => {
+  const b = e.target.closest('button'); if (!b) return;
+  radius = +b.dataset.r;
+  document.querySelectorAll('#radius button').forEach(x => x.classList.toggle('on', x === b));
+  drawArea(); later();
+};
+$('onlyNoSite').onchange = () => { if (map && data.length) renderRes(); };
+$('searchBtn').onclick = () => { initMap(); runSearch(); };
+$('geoBtn').onclick = () => {
+  initMap();
+  if (!navigator.geolocation) { say('Seu navegador não permite localização. Toque no mapa.'); return; }
+  say('Obtendo sua localização…');
+  navigator.geolocation.getCurrentPosition(
+    p => setCenter(p.coords.latitude, p.coords.longitude, true),
+    () => say('Não consegui sua localização. Permita o acesso no navegador ou toque no mapa.'),
+    { enableHighAccuracy: true, timeout: 10000 });
+};
+async function findAddr() {
+  const v = $('addr').value.trim(); if (!v) return;
+  initMap(); say('Procurando endereço…');
+  try {
+    const r = await fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=br&q=' + encodeURIComponent(v));
+    const j = await r.json();
+    if (!j.length) { say('Endereço não encontrado. Tente incluir a cidade.'); return; }
+    setCenter(+j[0].lat, +j[0].lon, true);
+  } catch (_) { say('Não foi possível buscar o endereço agora. Toque direto no mapa.'); }
+}
+$('addrGo').onclick = findAddr;
+$('addr').onkeydown = e => { if (e.key === 'Enter') findAddr(); };
+$('csvBtn').onclick = () => {
+  if (!shown.length) { say('Faça uma busca antes de baixar o CSV.'); return; }
+  const q = v => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"';
+  const rows = [['Nome','Tipo','Distancia (m)','Endereco','Telefone','Site','Latitude','Longitude'].map(q).join(',')]
+    .concat(shown.map(x => [x.name, CATS[x.id].l, Math.round(x.d), addr(x.tags), phone(x.tags), site(x.tags), x.lat, x.lng].map(q).join(',')));
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob(['\ufeff' + rows.join('\n')], { type: 'text/csv;charset=utf-8' }));
+  a.download = 'negocios-' + radius / 1000 + 'km.csv'; a.click(); URL.revokeObjectURL(a.href);
+};
+const _goTo = goTo;
+goTo = function (id) { _goTo(id); if (id === 'mapa') initMap(); };
+renderCats();
+ 
+    /* ==================== INIT ==================== */
+    renderChecklist();
+    renderErros();
+    renderPlano7();
+    renderGlossario();
+    calc();
+    draw();
+  </script>
+</body>
+</html>
+ 
